@@ -9,20 +9,30 @@
 
     <title>Weather Services</title>
 
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/App_icon.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="images/App_icon.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/App_icon.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/App_icon.png">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
+    <style>
+        #dayNightIcon, #weatherIcon{
+          filter: brightness(0) invert(1);
+        }
+    </style>
 </head>
 
 
 
-<body class="">
+<body>
     <div class="d-flex min-vh-100 justify-content-center align-items-center">
         <div class="text-white bg-dark card col-12 col-md-6 col-lg-4" id="weatherCard">
             <div class="card-body text-center">
                 <h1 class="mb-4">Current Weather</h1>
                 <div class="d-flex justify-content-center align-items-center mb-3">
-                    <img id="dayNightIcon" class="img-fluid me-2" style="filter: brightness(0) invert(1); width:40%; max-width:25px; height:auto;" src="" alt="Day/Night Icon" />
+                    <img id="dayNightIcon" class="img-fluid me-2" style="width:40%; max-width:25px; height:auto;" src="" alt="Day/Night Icon" />
                     <span id="temperature" class="fs-2">--</span>&#8457;
                 </div>
 
@@ -34,14 +44,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <img id="weatherIcon" class="img-fluid" style="filter: brightness(0) invert(1); width:60%; max-width:40px; height:auto;" src="" alt="Weather Icon" />
+                    <img id="weatherIcon" class="img-fluid" style="width:60%; max-width:40px; height:auto;" src="" alt="Weather Icon" />
                     <p class="mt-2" id="weatherExplanationText">--</p>
                 </div>
 
 
                 <button id="btnRefresh" class="btn btn-primary mt-3" type="button">Refresh Weather</button>
 
-                <small class="text-muted mt-3 d-block">
+                <small class="text-white mt-3 d-block">
                     Weather data courtesy of <a href="https://open-meteo.com/en" target="_blank">Open Meteo</a>.
                 </small>
             </div>
