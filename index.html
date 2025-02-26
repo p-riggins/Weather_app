@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <title>Weather Services</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+</head>
+
+
+
+<body class="">
+    <div class="d-flex min-vh-100 justify-content-center align-items-center">
+        <div class="text-white bg-dark card col-12 col-md-6 col-lg-4" id="weatherCard">
+            <div class="card-body text-center">
+                <h1 class="mb-4">Current Weather</h1>
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <img id="dayNightIcon" class="img-fluid me-2" style="filter: brightness(0) invert(1); width:40%; max-width:25px; height:auto;" src="" alt="Day/Night Icon" />
+                    <span id="temperature" class="fs-2">--</span>&#8457;
+                </div>
+
+                <div class="mb-3">
+                    <p> Humidity: <span id="humidity">--</span>%<br>
+                        Apparent Temperature: <span id="apparentTemperature">--</span>&#8457;<br>
+                        Precipitation: <span id="precipitation">--</span> in<br>
+                        Wind Speed: <span id="windSpeed">--</span> mph</p>
+                </div>
+
+                <div class="mb-3">
+                    <img id="weatherIcon" class="img-fluid" style="filter: brightness(0) invert(1); width:60%; max-width:40px; height:auto;" src="" alt="Weather Icon" />
+                    <p class="mt-2" id="weatherExplanationText">--</p>
+                </div>
+
+
+                <button id="btnRefresh" class="btn btn-primary mt-3" type="button">Refresh Weather</button>
+
+                <small class="text-muted mt-3 d-block">
+                    Weather data courtesy of <a href="https://open-meteo.com/en" target="_blank">Open Meteo</a>.
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
+            crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+            crossorigin="anonymous"></script>
+
+    <script>
+        // Mapping object that associates weather codes with image URLs and alt descriptions.
+        // For clear skies, we differentiate between day and night.
+        const weatherImageMappings = {
+            clear: { 
+                codes: [0], 
+                imgUrlDay: 'images/thermosun.svg', 
+                imgUrlNight: 'images/moon.svg', 
+                altDay: "Clear sky (day)", 
+                altNight: "Clear sky (night)" 
+            },
+            partlyCloudy: { 
+                codes: [1, 2, 3], 
+                imgUrl: 'images/partly_cloudy.svg', 
+                alt: "Partly cloudy" 
+            },
+            fog: { 
+                codes: [45, 48], 
+                imgUrl: 'images/fog.svg', 
+                alt: "Foggy" 
+            },
+            drizzle: { 
+                codes: [51, 53, 55], 
+                imgUrl: 'images/drizzle.svg', 
+                alt: "Drizzle" 
+            },
+            rain: { 
+                codes: [61, 63, 65], 
+                imgUrl: 'images/rain.svg', 
+                alt: "Rain" 
+            },
+            snow: { 
+                codes: [71, 73, 75], 
+                imgUrl: 'images/snow.svg', 
+                alt: "Snow" 
+            },
+            thunderstorm: { 
+                codes: [95], 
+                imgUrl: 'images/thunderstorm.svg', 
+                alt: "Thunderstorm" 
+            }
+        };
+
+        function getDayNightIcon(isDay) {
+            return isDay 
+                ? { imgUrl: 'images/sun.svg', alt: 'Daytime' }
+                : { imgUrl: 'images/moonstars.svg', alt: 'Nighttime' };                }
+    
+        // Function to determine the appropriate weather image based on the weather code and whether it is day.
+        function getWeatherImage(weatherCode, isDay) {
+            // Handle clear skies (weatherCode 0) separately to choose day or night image.
+            if (weatherCode === 0) {
+            return isDay 
+                ? { imgUrl: weatherImageMappings.clear.imgUrlDay, alt: weatherImageMappings.clear.altDay }
+                : { imgUrl: weatherImageMappings.clear.imgUrlNight, alt: weatherImageMappings.clear.altNight };
+            }
+            // Loop through other mappings.
+            for (const key in weatherImageMappings) {
+                if (key === 'clear') continue;
+                if (weatherImageMappings[key].codes.includes(weatherCode)) {
+                    return { imgUrl: weatherImageMappings[key].imgUrl, alt: weatherImageMappings[key].alt };
+                }
+            }
+            // Fallback if no mapping is found.
+            return { imgUrl: 'images/default.svg', alt: 'Unknown weather condition' };
+        }
+
+        function getWeatherExplanation(weatherCode) {
+            if (weatherCode === 0) {
+                return "Clear skies. Enjoy the brightness!";
+            } else if ([1, 2, 3].includes(weatherCode)) {
+                return "Partly cloudy skies with intermittent clouds.";
+            } else if ([45, 48].includes(weatherCode)) {
+                return "Foggy conditions reduce visibility.";
+            } else if ([51, 53, 55].includes(weatherCode)) {
+                return "Light drizzle is falling.";
+            } else if ([61, 63, 65].includes(weatherCode)) {
+                return "Rain is falling. An umbrella might be needed.";
+            } else if ([71, 73, 75].includes(weatherCode)) {
+                return "Snow is on the ground. Bundle up!";
+            } else if (weatherCode === 95) {
+                return "Thunderstorm in progress. Stay indoors if possible.";
+            } else {
+                return "Unknown weather condition.";
+            }
+        }
+    
+        // Function to fetch weather data from the API and update the DOM.
+        async function loadWeather() {
+        // Updated API URL with additional parameters: apparent_temperature, precipitation, wind_speed_10m.
+        const apiURL = "https://api.open-meteo.com/v1/forecast?latitude=36.1628&longitude=-85.5016&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,is_day&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch";
+        try {
+            const response = await fetch(apiURL);
+            if (!response.ok) {
+            throw new Error(`HTTP Error Status: ${response.status}`);
+            }
+            const data = await response.json();
+            // The API returns a "current" object with the following parameters.
+            const current = data.current;
+            const temperature = current.temperature_2m;
+            const humidity = current.relative_humidity_2m;
+            const apparentTemperature = current.apparent_temperature;
+            const precipitation = current.precipitation;
+            const windSpeed = current.wind_speed_10m;
+            const isDay = current.is_day; // 1 for day, 0 for night.
+            const weatherCode = current.weather_code;
+            
+            // Update the top section with day/night icon and temperature.
+            const dayNight = getDayNightIcon(isDay);
+            document.getElementById('dayNightIcon').src = dayNight.imgUrl;
+            document.getElementById('dayNightIcon').alt = dayNight.alt;
+            document.getElementById('temperature').textContent = temperature;
+
+            // Update the DOM with the retrieved weather data.
+            document.getElementById('humidity').textContent = humidity;
+            document.getElementById('apparentTemperature').textContent = apparentTemperature;
+            document.getElementById('precipitation').textContent = precipitation;
+            document.getElementById('windSpeed').textContent = windSpeed;
+
+            // Get the appropriate image URL and alt text.
+            const weatherImage = getWeatherImage(weatherCode, isDay);
+            const weatherIconElement = document.getElementById('weatherIcon');
+            // Set the image's src and alt attributes using vanilla JavaScript.
+            weatherIconElement.src = weatherImage.imgUrl;
+            weatherIconElement.alt = weatherImage.alt;
+            document.getElementById('weatherExplanationText').textContent = getWeatherExplanation(weatherCode);
+        } catch (error) {
+            console.error('Error fetching weather data:', error);
+        }
+        }
+    
+        // Initial load of weather data.
+        loadWeather();
+    
+        // Use a little jQuery to bind a click event to the refresh button.
+        $(document).on('click', '#btnRefresh', function() {
+            loadWeather();
+        });
+    </script>
+</body>
+</html>
